@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'freecurrencyapi' => [
+        'base_url' => env('FREE_CURRENCY_API_URL', 'https://api.freecurrencyapi.com/v1'),
+        'api_key' => env('FREE_CURRENCY_API_KEY'),
+    ],
+
 ];

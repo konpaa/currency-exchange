@@ -7,6 +7,33 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Currency Exchange
+
+Система конвертации валют с точной арифметикой (bcmath), автообновлением курсов из [freecurrencyapi.com](https://freecurrencyapi.com) и атомарным обновлением данных.
+
+### Команды (в Docker)
+
+```bash
+# Миграции
+docker compose exec app php artisan migrate --force
+
+# Обновить курсы валют
+docker compose exec app php artisan currency:update-rates
+
+# Тесты (используют БД testing)
+docker compose exec app php artisan test
+```
+
+Или через Makefile: `make migrate`, `make test`, `make rates-update`.
+
+### API
+
+- `GET /api/convert?amount=100&from=USD&to=EUR` — конвертация суммы.
+
+В `.env` задайте `FREE_CURRENCY_API_KEY` (ключ с freecurrencyapi.com). Курсы обновляются по расписанию раз в час.
+
+---
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
