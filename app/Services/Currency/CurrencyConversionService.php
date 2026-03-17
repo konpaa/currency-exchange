@@ -20,13 +20,14 @@ class CurrencyConversionService
     /**
      * Конвертировать сумму из одной валюты в другую.
      *
-     * @param  string  $amount  Сумма в виде строки (например, "100.50").
+     * @param  int|float|string  $amount  Сумма (например, 123 или "100.50").
      * @param  string  $fromCurrency  Исходная валюта.
      * @param  string  $toCurrency  Целевая валюта.
      * @return string  Результат в виде строки.
      */
-    public function convert(string $amount, string $fromCurrency, string $toCurrency): string
+    public function convert(int|float|string $amount, string $fromCurrency, string $toCurrency): string
     {
+        $amount = (string) $amount;
         $fromCurrency = strtoupper($fromCurrency);
         $toCurrency = strtoupper($toCurrency);
 
