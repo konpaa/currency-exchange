@@ -44,7 +44,8 @@ app/
 ```bash
 docker compose up -d
 docker compose exec app php artisan migrate --force
-docker compose exec app php artisan db:seed
+docker compose exec app php artisan currency:import --activate   # импорт валют из API
+docker compose exec app php artisan currency:update-rates        # первая загрузка курсов
 ```
 
 3. Создать админа: `docker compose exec app php artisan make:filament-user`
@@ -73,9 +74,17 @@ docker compose exec app php artisan db:seed
 
 ## Команды
 
+| Команда | Описание |
+|---|---|
+| `currency:import` | Импорт списка валют из API. Новые — неактивны. Валюты, которых нет в API, деактивируются |
+| `currency:import --activate` | То же, но новые сразу активны |
+| `currency:update-rates` | Обновить курсы для активных валют |
+| `test` | Тесты (БД `testing`) |
+
 ```bash
-docker compose exec app php artisan currency:update-rates   # обновить курсы вручную
-docker compose exec app php artisan test                     # тесты (БД testing)
+docker compose exec app php artisan currency:import
+docker compose exec app php artisan currency:update-rates
+docker compose exec app php artisan test
 ```
 
 Или через Makefile: `make migrate`, `make test`, `make rates-update`.
