@@ -52,4 +52,34 @@ readonly class FreeCurrencyApiProvider implements CurrencyRateProvider
 
         return $result;
     }
+
+    public function getAvailableCurrencies(): array
+    {
+        $response = $this->http->withHeaders([
+            'apikey' => $this->apiKey,
+        ])->get("$this->baseUrl/currencies", [
+            'apikey' => $this->apiKey,
+        ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException(
+                'FreeCurrencyAPI currencies request failed: ' . $response->status()
+            );
+        }
+
+        $data = $response->json('data');
+        if (! is_array($data)) {
+            throw new RuntimeException('FreeCurrencyAPI invalid currencies response');
+        }
+
+        $result = [];
+        foreach ($data as $code => $info) {
+            $result[(string) $code] = [
+                'code' => (string) $code,
+                'name' => $info['name'] ?? (string) $code,
+            ];
+        }
+
+        return $result;
+    }
 }

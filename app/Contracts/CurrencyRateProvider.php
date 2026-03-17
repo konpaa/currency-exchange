@@ -15,4 +15,11 @@ interface CurrencyRateProvider
      * @return array<string, string>  Пары [код валюты => курс в виде строки для точной арифметики].
      */
     public function getLatestRates(string $baseCurrency, ?array $currencies = null): array;
+
+    /**
+     * Возвращает список всех доступных валют из источника.
+     *
+     * @return array<string, array{code: string, name: string}>
+     */
+    public function getAvailableCurrencies(): array;
 }
