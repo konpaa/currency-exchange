@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class DatabaseCurrencyRateRepository implements CurrencyRateRepository
 {
+    /** @var array<string, int> */
+    private array $generationCache = [];
+
     public function getRate(string $baseCurrency, string $currencyCode): ?string
     {
         $baseCurrency = strtoupper($baseCurrency);
@@ -84,16 +87,22 @@ class DatabaseCurrencyRateRepository implements CurrencyRateRepository
                 ->where('base_currency', $baseCurrency)
                 ->where('generation', '<', $newGen)
                 ->delete();
+
+            $this->generationCache[$baseCurrency] = $newGen;
         });
     }
 
     private function currentGeneration(string $baseCurrency): int
     {
+        if (isset($this->generationCache[$baseCurrency])) {
+            return $this->generationCache[$baseCurrency];
+        }
+
         $max = CurrencyRate::query()
             ->where('base_currency', $baseCurrency)
             ->max('generation');
 
-        return (int) ($max ?? 0);
+        return $this->generationCache[$baseCurrency] = (int) ($max ?? 0);
     }
 
     private function normalizeRate(string $value): string

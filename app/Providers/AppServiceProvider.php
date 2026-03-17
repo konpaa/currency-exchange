@@ -15,9 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(CurrencyRateRepositoryContract::class, DatabaseCurrencyRateRepository::class);
+        $this->app->singleton(CurrencyRateRepositoryContract::class, DatabaseCurrencyRateRepository::class);
 
-        $this->app->bind(CurrencyRateProvider::class, function ($app) {
+        $this->app->singleton(CurrencyRateProvider::class, function ($app) {
             $config = config('services.freecurrencyapi');
             return new FreeCurrencyApiProvider(
                 $app->make(\Illuminate\Http\Client\Factory::class),

@@ -28,10 +28,23 @@ class Currency extends Model
 
     public static function availableCodes(): array
     {
-        return static::query()
-            ->where('is_active', true)
-            ->orderBy('code')
-            ->pluck('code')
-            ->all();
+        return cache()->remember('currency:available_codes', 60 * 60, function () {
+            return static::query()
+                ->where('is_active', true)
+                ->orderBy('code')
+                ->pluck('code')
+                ->all();
+        });
+    }
+
+    public static function flushAvailableCodesCache(): void
+    {
+        cache()->forget('currency:available_codes');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => static::flushAvailableCodesCache());
+        static::deleted(fn () => static::flushAvailableCodesCache());
     }
 }
