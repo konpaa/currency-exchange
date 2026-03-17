@@ -26,6 +26,21 @@ class DatabaseCurrencyRateRepository implements CurrencyRateRepository
         return $model ? $this->normalizeRate((string) $model->rate) : null;
     }
 
+    public function getRatesForCodes(string $baseCurrency, array $currencyCodes): array
+    {
+        $baseCurrency = strtoupper($baseCurrency);
+        $currencyCodes = array_map('strtoupper', $currencyCodes);
+        $gen = $this->currentGeneration($baseCurrency);
+
+        return CurrencyRate::query()
+            ->where('base_currency', $baseCurrency)
+            ->whereIn('currency_code', $currencyCodes)
+            ->where('generation', $gen)
+            ->pluck('rate', 'currency_code')
+            ->map(fn ($rate) => $this->normalizeRate((string) $rate))
+            ->all();
+    }
+
     public function getRatesByBase(string $baseCurrency): array
     {
         $baseCurrency = strtoupper($baseCurrency);

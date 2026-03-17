@@ -13,6 +13,14 @@ interface CurrencyRateRepository
     public function getRate(string $baseCurrency, string $currencyCode): ?string;
 
     /**
+     * Получить курсы для нескольких валют за один запрос.
+     *
+     * @param  array<string>  $currencyCodes
+     * @return array<string, string>  [код валюты => курс] (только найденные)
+     */
+    public function getRatesForCodes(string $baseCurrency, array $currencyCodes): array;
+
+    /**
      * Получить все курсы для базовой валюты.
      *
      * @return array<string, string>  [код валюты => курс]

@@ -38,18 +38,12 @@ class CurrencyConversionServiceTest extends TestCase
     #[Test]
     public function converts_using_repository_rates(): void
     {
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'EUR')
-            ->andReturn('0.92');
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'USD')
-            ->never();
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'RUB')
-            ->andReturn('95.5');
+        $this->repository->shouldReceive('getRatesForCodes')
+            ->once()
+            ->with('USD', ['EUR', 'RUB'])
+            ->andReturn(['EUR' => '0.92', 'RUB' => '95.5']);
 
         $result = $this->service->convert('100', 'EUR', 'RUB');
-        // 100 EUR -> 100/0.92 USD -> * 95.5 RUB
         $expected = bcmul(bcdiv('100', '0.92', 18), '95.5', 18);
         $this->assertSame(rtrim(rtrim($expected, '0'), '.'), $result);
     }
@@ -57,12 +51,9 @@ class CurrencyConversionServiceTest extends TestCase
     #[Test]
     public function throws_when_from_currency_rate_missing(): void
     {
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'XXX')
-            ->andReturn(null);
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'USD')
-            ->andReturn('1');
+        $this->repository->shouldReceive('getRatesForCodes')
+            ->once()
+            ->andReturn([]);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(__('currency.errors.rate_not_found', ['currency' => 'XXX']));
@@ -72,12 +63,9 @@ class CurrencyConversionServiceTest extends TestCase
     #[Test]
     public function throws_when_to_currency_rate_missing(): void
     {
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'USD')
-            ->andReturn('1');
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'YYY')
-            ->andReturn(null);
+        $this->repository->shouldReceive('getRatesForCodes')
+            ->once()
+            ->andReturn(['USD' => '1']);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(__('currency.errors.rate_not_found', ['currency' => 'YYY']));
@@ -95,12 +83,9 @@ class CurrencyConversionServiceTest extends TestCase
     #[Test]
     public function precise_arithmetic_no_float_errors(): void
     {
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'USD')
-            ->andReturn('1');
-        $this->repository->shouldReceive('getRate')
-            ->with('USD', 'EUR')
-            ->andReturn('0.92');
+        $this->repository->shouldReceive('getRatesForCodes')
+            ->once()
+            ->andReturn(['EUR' => '0.92']);
 
         $result = $this->service->convert('1', 'USD', 'EUR');
         $this->assertSame('0.92', $result);

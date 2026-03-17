@@ -39,8 +39,10 @@ class CurrencyConversionService
 
         $baseCurrency = strtoupper((string) config('currency.base', 'USD'));
 
-        $rateFrom = $this->repository->getRate($baseCurrency, $fromCurrency);
-        $rateTo = $this->repository->getRate($baseCurrency, $toCurrency);
+        $rates = $this->repository->getRatesForCodes($baseCurrency, [$fromCurrency, $toCurrency]);
+
+        $rateFrom = $fromCurrency === $baseCurrency ? '1' : ($rates[$fromCurrency] ?? null);
+        $rateTo = $toCurrency === $baseCurrency ? '1' : ($rates[$toCurrency] ?? null);
 
         if ($rateFrom === null) {
             throw new InvalidArgumentException(__('currency.errors.rate_not_found', ['currency' => $fromCurrency]));
@@ -49,9 +51,7 @@ class CurrencyConversionService
             throw new InvalidArgumentException(__('currency.errors.rate_not_found', ['currency' => $toCurrency]));
         }
 
-        // amount_in_base = amount / rate_from (сколько единиц базы в amount единицах from)
         $amountInBase = bcdiv($amount, $rateFrom, self::SCALE);
-        // result = amount_in_base * rate_to
         $result = bcmul($amountInBase, $rateTo, self::SCALE);
 
         return $this->normalizeAmount($result);
